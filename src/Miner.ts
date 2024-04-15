@@ -95,6 +95,7 @@ export class Miner {
      * Tx: <tx hash>
      * ...
      */
+
     writeToOutputFile(
       block.block.serialize().toString("hex"),
       coinbaseTx.serialize().toString("hex"),
@@ -169,7 +170,7 @@ export class Miner {
 // }
 
 function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
-  const outputData = `${blockHeader}${coinbaseTxSerialized}\n${transactionIds.join(
+  const outputData = `${blockHeader}\n${coinbaseTxSerialized}\n${transactionIds.join(
     "\n"
   )}`;
 
