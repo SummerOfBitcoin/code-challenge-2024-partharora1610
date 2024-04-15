@@ -85,22 +85,13 @@ export class Miner {
     // console.log(this.filled);
     // console.log(this.feesCollected);
 
-    /**
-     * WRITE TO THE OUTPUT.TXT FILE'
-     * -------------------------------------------------
-     * Format of the output.txt file:
-     * Block: <block hash>
-     * Coinbase Tx: <tx hash>
-     * Tx: <tx hash>
-     * Tx: <tx hash>
-     * ...
-     */
-
     writeToOutputFile(
-      block.block.serialize().toString("hex"),
+      block.block.serialize().reverse().toString("hex"),
       coinbaseTx.serialize().toString("hex"),
       txid.map((tx) => tx.toString("hex"))
     );
+
+    // running grader
   }
 
   public fillBlock(
@@ -147,27 +138,6 @@ export class Miner {
     return selectedTxs;
   }
 }
-
-// function difficultyToBits(difficulty: bigint): Buffer {
-//   const difficultyHex: string = difficulty.toString(16);
-
-//   const leadingZeros: number =
-//     difficultyHex.length - difficultyHex.replace(/^0*/, "").length;
-//   const exponent: number = (difficultyHex.length - leadingZeros + 1) * 2;
-
-//   const paddedHex: string = difficultyHex.padStart(
-//     Math.ceil(difficultyHex.length / 2) * 2,
-//     "0"
-//   );
-
-//   const coefficient: string = paddedHex.substr(leadingZeros, 6).padEnd(6, "0");
-
-//   const bitsBuffer: Buffer = Buffer.alloc(4);
-//   bitsBuffer.writeUInt8(exponent, 0);
-//   bitsBuffer.writeUIntBE(parseInt(coefficient, 16), 1, 3);
-
-//   return bitsBuffer;
-// }
 
 function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
   const outputData = `${blockHeader}\n${coinbaseTxSerialized}\n${transactionIds.join(

@@ -87,12 +87,11 @@ export class Block {
     merkleRoot: Buffer,
     bits: Buffer
   ) {
+    const timestamp = BigInt(Math.floor(Date.now() / 1000));
     let nonce = 0;
     let hash = "";
 
     while (true) {
-      const timestamp = BigInt(Math.floor(Date.now() / 1000));
-
       const block = new Block(
         bigFromBufLE(version),
         prevBlockHash,
