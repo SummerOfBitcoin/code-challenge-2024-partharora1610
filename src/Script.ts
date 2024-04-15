@@ -1,4 +1,3 @@
-import { S256Point } from "./ecc/S256Point";
 import { Operations } from "./operations/Operations";
 import { OpCode } from "./operations/opcode";
 import { bigToBufLE } from "./util/BigIntUtil";

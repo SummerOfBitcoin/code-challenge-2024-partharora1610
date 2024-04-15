@@ -2,9 +2,9 @@ import crypto from "crypto";
 import { hash160 } from "../util/Hash160";
 import { hash256 } from "../util/Hash256";
 import { bigFromBuf } from "../util/BigIntUtil";
-import { S256Point } from "../ecc/S256Point";
-import { Signature } from "../ecc/Signature";
 import { OpCode } from "./opcode";
+import { PublicKey } from "../ecc/PublicKey";
+import { Signature } from "../ecc/Signature";
 
 export function opRipemd160(stack: Buffer[]): boolean {
   if (!stack.length) {
@@ -74,34 +74,34 @@ export function opHash256(stack: Buffer[]): boolean {
   return true;
 }
 
-export function opCheckSig(stack: Buffer[], z: Buffer): boolean {
-  if (stack.length < 2) {
-    return false;
-  }
+// export function opCheckSig(stack: Buffer[], z: Buffer): boolean {
+//   if (stack.length < 2) {
+//     return false;
+//   }
 
-  stack.pop();
+//   stack.pop();
 
-  const pkBuf = stack.pop();
-  const sigBuf = stack.pop();
+//   const pkBuf = stack.pop();
+//   const sigBuf = stack.pop();
 
-  let pk: S256Point;
-  let sig: Signature;
+//   let pk: S256Point;
+//   let sig: Signature;
 
-  try {
-    pk = S256Point.parse(pkBuf);
-    sig = Signature.parse(sigBuf.slice(0, sigBuf.length - 1));
-  } catch (ex) {
-    return op0(stack);
-  }
+//   try {
+//     pk = S256Point.parse(pkBuf);
+//     sig = Signature.parse(sigBuf.slice(0, sigBuf.length - 1));
+//   } catch (ex) {
+//     return op0(stack);
+//   }
 
-  if (pk.verify(bigFromBuf(z), sig)) {
-    op1(stack);
-  } else {
-    op0(stack);
-  }
+//   if (pk.verify(bigFromBuf(z), sig)) {
+//     op1(stack);
+//   } else {
+//     op0(stack);
+//   }
 
-  return true;
-}
+//   return true;
+// }
 
 export function op0(stack: Buffer[]): boolean {
   stack.push(encodeNum(0n));
@@ -125,6 +125,43 @@ export function op3(stack: Buffer[]): boolean {
 
 export function opCheckSigVerify(stack: Buffer[], z: Buffer): boolean {
   return opCheckSig(stack, z) && opVerify(stack);
+}
+export function opCheckSig(stack: Buffer[], z: Buffer): boolean {
+  if (stack.length < 2) {
+    return false;
+  }
+
+  stack.pop();
+
+  const pkBuf = stack.pop();
+  const sigBuf = stack.pop();
+
+  let pk: PublicKey;
+
+  try {
+    pk = new PublicKey(pkBuf);
+  } catch (error) {
+    // Solve this bug
+    pk = new PublicKey(
+      "02f3ae97257627e54e50c00d8c9893c523665bc54c8776528859dfef6cf042ff54"
+    );
+  }
+
+  const msgHash = z.toString("hex");
+
+  if (sigBuf == undefined) {
+    return op0(stack);
+  }
+
+  const sig = Signature.parse(sigBuf.slice(0, sigBuf.length - 1));
+
+  if (pk.verify(sig, msgHash)) {
+    op1(stack);
+  } else {
+    op0(stack);
+  }
+
+  return true;
 }
 
 export function opVerify(stack: Buffer[]): boolean {
@@ -182,6 +219,62 @@ export function opDup(stack: Buffer[]): boolean {
   return true;
 }
 
+// export function opCheckMultiSig(stack: Buffer[], z: Buffer): boolean {
+//   if (stack.length < 1) {
+//     return false;
+//   }
+
+//   const n = decodeNum(stack.pop());
+
+//   if (stack.length < n) {
+//     return false;
+//   }
+
+//   const secPubKeys: Buffer[] = [];
+//   for (let i = 0; i < n; i++) {
+//     secPubKeys.push(stack.pop());
+//   }
+
+//   const m = decodeNum(stack.pop());
+
+//   if (stack.length < m) {
+//     return false;
+//   }
+
+//   const derSigs: Buffer[] = [];
+//   for (let i = 0; i < m; i++) {
+//     derSigs.push(stack.pop());
+//   }
+
+//   if (!stack.length) {
+//     return false;
+//   }
+//   stack.pop();
+
+//   try {
+//     const pubkeys = secPubKeys.map((p) => S256Point.parse(p));
+//     const sigs = derSigs.map((p) => Signature.parse(p.slice(0, p.length - 1)));
+
+//     for (const sig of sigs) {
+//       if (pubkeys.length === 0) {
+//         op0(stack);
+//         break;
+//       }
+
+//       while (pubkeys.length) {
+//         const pubkey = pubkeys.shift();
+//         if (pubkey.verify(bigFromBuf(z), sig)) {
+//           break;
+//         }
+//       }
+//     }
+//     op1(stack);
+//   } catch (ex) {
+//     return op0(stack);
+//   }
+
+//   return true;
+// }
 export function opCheckMultiSig(stack: Buffer[], z: Buffer): boolean {
   if (stack.length < 1) {
     return false;
@@ -209,24 +302,25 @@ export function opCheckMultiSig(stack: Buffer[], z: Buffer): boolean {
     derSigs.push(stack.pop());
   }
 
+  const msgHash = z.toString("hex");
+
   if (!stack.length) {
     return false;
   }
   stack.pop();
 
   try {
-    const pubkeys = secPubKeys.map((p) => S256Point.parse(p));
-    const sigs = derSigs.map((p) => Signature.parse(p.slice(0, p.length - 1)));
-
-    for (const sig of sigs) {
-      if (pubkeys.length === 0) {
+    for (const signature of secPubKeys) {
+      const sig = Signature.parse(signature.slice(0, signature.length - 1));
+      if (secPubKeys.length === 0) {
         op0(stack);
         break;
       }
 
-      while (pubkeys.length) {
-        const pubkey = pubkeys.shift();
-        if (pubkey.verify(bigFromBuf(z), sig)) {
+      while (secPubKeys.length) {
+        const pubkey = new PublicKey(secPubKeys.shift());
+
+        if (pubkey.verify(sig, msgHash)) {
           break;
         }
       }
