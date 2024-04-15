@@ -42,14 +42,11 @@ export class Miner {
       1n
     );
 
-    console.log("Coinbase Transaction: ");
-    console.log(coinbaseTx);
-
-    console.log("===================================================");
-
-    console.log("Coinbase Transaction Added to the list of transaction ");
-    res.unshift(coinbaseTx);
-
+    // console.log("Coinbase Transaction: ");
+    // console.log(coinbaseTx);
+    // console.log("===================================================");
+    // console.log("Coinbase Transaction Added to the list of transaction ");
+    // res.unshift(coinbaseTx);
     const txid = res.map((tx) => tx.getTxID());
 
     // Data for mining the block
@@ -66,6 +63,7 @@ export class Miner {
       "hex"
     );
     // The fuction is giving the wrong output so I am hardcoding the bits value
+    // hard coding this....
     const bits = Buffer.from("1f00ffff", "hex");
 
     /**
@@ -80,12 +78,12 @@ export class Miner {
     // Adding block to the blockchain
     // this.blockchain.addBlock(block.block);
 
-    console.log("Block mined successfully!");
-    console.log(block);
+    // console.log("Block mined successfully!");
+    // console.log(block);
 
-    console.log("Final Result of the block mining: ");
-    console.log(this.filled);
-    console.log(this.feesCollected);
+    // console.log("Final Result of the block mining: ");
+    // console.log(this.filled);
+    // console.log(this.feesCollected);
 
     /**
      * WRITE TO THE OUTPUT.TXT FILE'
@@ -177,9 +175,9 @@ function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
 
   fs.writeFile("output.txt", outputData, (err) => {
     if (err) {
-      console.error("Error writing to output.txt:", err);
+      // console.error("Error writing to output.txt:", err);
     } else {
-      console.log("Output file generated successfully!");
+      // console.log("Output file generated successfully!");
     }
   });
 }

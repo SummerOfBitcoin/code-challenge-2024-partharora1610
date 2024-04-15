@@ -123,27 +123,6 @@ export class Tx {
 
       const redeemScript = new Script([], redeemBytes.toString("hex"));
 
-      // p2sh-p2wpkh
-      // if (redeemScript.isP2WPKHLock()) {
-      //   z = await this.sigHashSegwit(idx, redeemScript);
-      //   witness = txIn.witness;
-      // }
-
-      // // p2sh-p2wsh
-      // else if (redeemScript.isP2WSHLock()) {
-      //   const witnessScriptBuf = txIn.witness[
-      //     txIn.witness.length - 1
-      //   ] as Buffer;
-
-      //   const witnessScript = new Script([], witnessScriptBuf.toString("hex"));
-
-      //   z = await this.sigHashSegwit(idx, undefined, witnessScript);
-      //   witness = txIn.witness;
-      // }
-
-      // // only p2sh
-      // else {
-      // }
       z = this.sigHashLegacy(idx, redeemScript);
       witness = undefined;
     }

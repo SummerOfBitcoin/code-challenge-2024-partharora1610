@@ -103,7 +103,7 @@ export class Block {
       );
 
       hash = block.hash().toString("hex");
-      console.log(hash, "hash");
+      // console.log(hash, "hash");
 
       if (hash.startsWith("0".repeat(4))) {
         return { block, hash };
