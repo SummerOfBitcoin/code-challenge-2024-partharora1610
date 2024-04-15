@@ -165,7 +165,9 @@ export class Miner {
 // }
 
 function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
-  const outputData = `$${coinbaseTxSerialized}\n${transactionIds.join("\n")}`;
+  const outputData = `${blockHeader}${coinbaseTxSerialized}\n${transactionIds.join(
+    "\n"
+  )}`;
 
   fs.writeFile("output.txt", outputData, (err) => {
     if (err) {
