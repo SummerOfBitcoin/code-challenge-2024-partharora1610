@@ -102,7 +102,7 @@ export class Tx {
     return inAmt - outAmt;
   }
 
-  public async verifyInput(idx: number): Promise<boolean> {
+  public verifyInput(idx: number): boolean {
     const txIn = this.txIns[idx];
 
     // For p2tr scripts => Out of the scope of assignments so just validating inputs using p2tr scripts
@@ -144,13 +144,13 @@ export class Tx {
       // // only p2sh
       // else {
       // }
-      z = await this.sigHashLegacy(idx, redeemScript);
+      z = this.sigHashLegacy(idx, redeemScript);
       witness = undefined;
     }
 
     // P2PWKH scripts
     else if (scriptPubKey.isP2WPKHLock()) {
-      z = await this.sigHashSegwit(idx);
+      z = this.sigHashSegwit(idx);
       witness = txIn.witness;
     }
 
@@ -160,7 +160,7 @@ export class Tx {
 
       const witnessScript = new Script([], witnessScriptBuf.toString("hex"));
 
-      z = await this.sigHashSegwit(idx, undefined, witnessScript);
+      z = this.sigHashSegwit(idx, undefined, witnessScript);
 
       witness = txIn.witness;
     }
@@ -168,7 +168,7 @@ export class Tx {
     // Legacy Scripts (P2PKH or P2Pk)
     else {
       try {
-        z = await this.sigHashLegacy(idx);
+        z = this.sigHashLegacy(idx);
       } catch (error) {
         throw new Error("Error in sigHashLegacy");
       }
@@ -179,19 +179,19 @@ export class Tx {
     return combined.evaluate(z, witness);
   }
 
-  public async verify(): Promise<boolean> {
+  public verify(): boolean {
     for (const txIn of this.txIns) {
       if (txIn.scriptType == "v1_p2tr") {
         return true;
       }
     }
 
-    if ((await this.fees()) < 0) {
+    if (this.fees() < 0) {
       return false;
     }
 
     for (let i = 0; i < this.txIns.length; i++) {
-      if (!(await this.verifyInput(i))) {
+      if (!this.verifyInput(i)) {
         return false;
       }
     }
@@ -275,11 +275,11 @@ export class Tx {
     return combine(...bufs);
   }
 
-  public async sigHashSegwit(
+  public sigHashSegwit(
     input: number,
     redeemScript?: Script,
     witnessScript?: Script
-  ): Promise<Buffer> {
+  ): Buffer {
     const vin = this.txIns[input];
     const version = bigToBufLE(this.version, 4);
 
@@ -302,14 +302,14 @@ export class Tx {
 
     // p2wpkh - 0x1976a914{20-byte-pubkey-hash}88ac
     else {
-      const prevScriptPubKey = await vin.scriptPubKey();
+      const prevScriptPubKey = vin.scriptPubKey();
 
       const pkh160 = prevScriptPubKey.cmds[1] as Buffer;
 
       scriptCode = p2pkhLock(pkh160).serialize();
     }
 
-    const value = bigToBufLE(await vin.value(), 8);
+    const value = bigToBufLE(vin.value(), 8);
     const sequence = bigToBufLE(vin.sequence, 4);
     const hashOutputs = this.hashOutputs();
     const locktime = bigToBufLE(this.locktime, 4);
@@ -366,10 +366,7 @@ export class Tx {
     return this._hashSequence;
   }
 
-  public async sigHashLegacy(
-    input: number,
-    redeemScript?: Script
-  ): Promise<Buffer> {
+  public sigHashLegacy(input: number, redeemScript?: Script): Buffer {
     const version = bigToBufLE(this.version, 4);
 
     const txInLen = encodeVarint(BigInt(this.txIns.length));

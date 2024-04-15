@@ -29,7 +29,7 @@ export class Miner {
     const fees = this.mempoll.feesArrayVector;
     const weights = this.mempoll.txWeightVector;
 
-    const res = await this.fillBlock(
+    const res = this.fillBlock(
       maxBlockSize - BLOCK_HEADER_SIZE - COINBASE_TX_SIZE,
       tx,
       fees,
@@ -104,12 +104,12 @@ export class Miner {
     );
   }
 
-  public async fillBlock(
+  public fillBlock(
     maxBlockSize: number,
     tx: Tx[],
     fees: bigint[],
     weights: number[]
-  ): Promise<Tx[]> {
+  ): Tx[] {
     const feePerWeight = [];
 
     for (let i = 0; i < tx.length; i++) {
@@ -130,7 +130,7 @@ export class Miner {
         break;
       }
 
-      const valid = await tx[index].verify();
+      const valid = tx[index].verify();
 
       if (!valid) {
         continue;
