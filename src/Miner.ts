@@ -15,11 +15,12 @@ export class Miner {
   public dp;
   public filled = 4000000;
   public feesCollected = 0;
+  // private blockchain: Blockchain
 
-  constructor(private blockchain: Blockchain) {
+  constructor() {
     this.mempoll = new Mempoll();
     this.dp = new Map();
-    this.blockchain = blockchain;
+    // this.blockchain = blockchain;
   }
 
   public async mineBlock() {
@@ -58,7 +59,12 @@ export class Miner {
     const hexString: string =
       "0000ffff00000000000000000000000000000000000000000000000000000000";
     const bigintValue: bigint = BigInt("0x" + hexString);
-    const prevBlock = this.blockchain.getLatestBlock().hash();
+    // const prevBlock = this.blockchain.getLatestBlock().hash();
+    // for checking
+    const prevBlock = Buffer.from(
+      "dd10890b9dec473fdc8dc30736512616a8256c3228c716fbc2aaa4bee852a1c3",
+      "hex"
+    );
     // The fuction is giving the wrong output so I am hardcoding the bits value
     const bits = Buffer.from("1f00ffff", "hex");
 
@@ -72,7 +78,7 @@ export class Miner {
      */
     const block = Block.mineBlock(version, prevBlock, mr, bits);
     // Adding block to the blockchain
-    this.blockchain.addBlock(block.block);
+    // this.blockchain.addBlock(block.block);
 
     console.log("Block mined successfully!");
     console.log(block);

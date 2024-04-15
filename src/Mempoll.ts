@@ -82,14 +82,4 @@ export class Mempoll {
       console.error("Error processing mempool:", err);
     }
   }
-
-  public fetchNextBest(): [Tx, bigint, number] {
-    const index = 0;
-
-    return [
-      this.txs[index],
-      this.feesArrayVector[index],
-      this.txWeightVector[index],
-    ];
-  }
 }
