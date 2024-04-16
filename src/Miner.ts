@@ -32,9 +32,14 @@ export class Miner {
 
     // const wTxid = res.map((tx) => tx.getWTxID().reverse().toString("hex")); // witness root hash
     const wTxid = res.map((tx) => tx.getWTxID());
+    const wTxidCoinbase = Buffer.from(
+      "0000000000000000000000000000000000000000000000000000000000000000",
+      "hex"
+    );
+    wTxid.unshift(wTxidCoinbase);
     const witnessCommitment = calculateWitnessCommitment(wTxid);
 
-    console.log("witnessCommitment", witnessCommitment);
+    // console.log("witnessCommitment", witnessCommitment);
 
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
     // console.log(coinbaseTx);
@@ -49,6 +54,7 @@ export class Miner {
 
     const hashBuf = txid.map((tx) => Buffer.from(tx, "hex"));
     const mr = generateMerkleRoot(hashBuf);
+    // console.log("Merkle Root", mr);
 
     /**
      * version
