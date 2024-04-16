@@ -145,7 +145,8 @@ export function opCheckSig(stack: Buffer[], z: Buffer): boolean {
     // pk = new PublicKey(
     //   "02f3ae97257627e54e50c00d8c9893c523665bc54c8776528859dfef6cf042ff54"
     // );
-    return op0(stack);
+    op0(stack);
+    return false;
   }
 
   const msgHash = z.toString("hex");
