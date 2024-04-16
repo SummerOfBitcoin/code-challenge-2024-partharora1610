@@ -141,9 +141,9 @@ export class Tx {
 
   public getTxID() {
     if (!this.segwit) {
-      return hash25(this.serializeLegacy());
+      return sha256(sha256(this.serializeLegacy()));
     } else {
-      return hash25(this.serializeSegwitTxID());
+      return sha256(sha256(this.serializeSegwitTxID()));
     }
   }
 

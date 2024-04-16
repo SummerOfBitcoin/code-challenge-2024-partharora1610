@@ -5,6 +5,7 @@ import { BLOCK_HEADER_SIZE, COINBASE_TX_SIZE } from "./constants";
 import fs from "fs";
 import { createHash } from "crypto";
 import { get } from "http";
+import { hash256 } from "./util/Hash256";
 
 export class Miner {
   public mempoll: Mempoll;
@@ -34,13 +35,17 @@ export class Miner {
     const witnessCommitment = calculateWitnessCommitment(wTxid);
 
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
-    const coinbaseId = hash25(coinbaseTx);
+    // console.log(coinbaseTx);
 
-    const txid = res.map((tx) => tx.getTxID());
-    txid.unshift(coinbaseId);
+    const coinbaseId = hash256(Buffer.from(coinbaseTx));
+    // console.log("coinbaseId", coinbaseId.toString("hex"));
+
+    const txid = res.map((tx) => tx.getTxID().reverse().toString("hex"));
+
+    // const txid = res.map((tx) => tx.getTxID());
+    // txid.unshift(coinbaseId.toString("hex"));
 
     const hashBuf = txid.map((tx) => Buffer.from(tx));
-
     const mr = generateMerkleRoot(hashBuf);
 
     /**
@@ -56,8 +61,7 @@ export class Miner {
     writeToOutputFile(
       block,
       coinbaseTx,
-      // reversing to get the txId
-      txid.map((tx) => tx.split("").reverse().join(""))
+      txid.map((tx) => tx)
     );
   }
 
