@@ -34,7 +34,7 @@ export class Miner {
 
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
 
-    const txid = res.map((tx) => tx.getTxID());
+    const txid = res.map((tx) => tx.getTxID().split("").reverse().join(""));
 
     const hashBuf = txid.map((tx) => Buffer.from(tx));
     const mr = generateMerkleRoot(hashBuf);
@@ -49,14 +49,10 @@ export class Miner {
      */
     const block = Block.mineBlock(mr);
 
-    console.log("Final Result of the block mining: ");
-    console.log(this.filled);
-    console.log(this.feesCollected);
-
     writeToOutputFile(
       block,
       coinbaseTx,
-      txid.map((tx) => tx.split("").reverse().join(""))
+      txid.map((tx) => tx)
     );
   }
 
@@ -91,8 +87,6 @@ export class Miner {
       if (!valid) {
         continue;
       }
-
-      // console.log(tx[index]);
 
       selectedTxs.push(tx[index]);
       currentBlockSize += txSize;
