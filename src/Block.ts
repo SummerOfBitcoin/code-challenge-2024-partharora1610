@@ -91,12 +91,10 @@ export class Block {
 
     while (true) {
       const block = createBlock(merkleRoot.toString("hex"), nonce);
-      console.log(block);
 
       const hash = hash256(Buffer.from(block, "hex"));
 
       if (difficulty.compare(hash) > 0) {
-        // console.log(hash);
         return block;
       }
 
