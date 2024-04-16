@@ -141,12 +141,7 @@ export function opCheckSig(stack: Buffer[], z: Buffer): boolean {
   try {
     pk = new PublicKey(pkBuf);
   } catch (error) {
-    // Solve this bug
-    // pk = new PublicKey(
-    //   "02f3ae97257627e54e50c00d8c9893c523665bc54c8776528859dfef6cf042ff54"
-    // );
     op0(stack);
-    return false;
   }
 
   const msgHash = z.toString("hex");
@@ -157,7 +152,9 @@ export function opCheckSig(stack: Buffer[], z: Buffer): boolean {
 
   const sig = Signature.parse(sigBuf.slice(0, sigBuf.length - 1));
 
-  if (pk.verify(sig, msgHash)) {
+  const der = sig.der();
+
+  if (pk.verify(der, msgHash)) {
     op1(stack);
   } else {
     op0(stack);
