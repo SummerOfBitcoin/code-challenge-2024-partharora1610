@@ -142,9 +142,10 @@ export function opCheckSig(stack: Buffer[], z: Buffer): boolean {
     pk = new PublicKey(pkBuf);
   } catch (error) {
     // Solve this bug
-    pk = new PublicKey(
-      "02f3ae97257627e54e50c00d8c9893c523665bc54c8776528859dfef6cf042ff54"
-    );
+    // pk = new PublicKey(
+    //   "02f3ae97257627e54e50c00d8c9893c523665bc54c8776528859dfef6cf042ff54"
+    // );
+    return op0(stack);
   }
 
   const msgHash = z.toString("hex");
@@ -219,62 +220,6 @@ export function opDup(stack: Buffer[]): boolean {
   return true;
 }
 
-// export function opCheckMultiSig(stack: Buffer[], z: Buffer): boolean {
-//   if (stack.length < 1) {
-//     return false;
-//   }
-
-//   const n = decodeNum(stack.pop());
-
-//   if (stack.length < n) {
-//     return false;
-//   }
-
-//   const secPubKeys: Buffer[] = [];
-//   for (let i = 0; i < n; i++) {
-//     secPubKeys.push(stack.pop());
-//   }
-
-//   const m = decodeNum(stack.pop());
-
-//   if (stack.length < m) {
-//     return false;
-//   }
-
-//   const derSigs: Buffer[] = [];
-//   for (let i = 0; i < m; i++) {
-//     derSigs.push(stack.pop());
-//   }
-
-//   if (!stack.length) {
-//     return false;
-//   }
-//   stack.pop();
-
-//   try {
-//     const pubkeys = secPubKeys.map((p) => S256Point.parse(p));
-//     const sigs = derSigs.map((p) => Signature.parse(p.slice(0, p.length - 1)));
-
-//     for (const sig of sigs) {
-//       if (pubkeys.length === 0) {
-//         op0(stack);
-//         break;
-//       }
-
-//       while (pubkeys.length) {
-//         const pubkey = pubkeys.shift();
-//         if (pubkey.verify(bigFromBuf(z), sig)) {
-//           break;
-//         }
-//       }
-//     }
-//     op1(stack);
-//   } catch (ex) {
-//     return op0(stack);
-//   }
-
-//   return true;
-// }
 export function opCheckMultiSig(stack: Buffer[], z: Buffer): boolean {
   if (stack.length < 1) {
     return false;
@@ -325,6 +270,7 @@ export function opCheckMultiSig(stack: Buffer[], z: Buffer): boolean {
         }
       }
     }
+
     op1(stack);
   } catch (ex) {
     return op0(stack);
