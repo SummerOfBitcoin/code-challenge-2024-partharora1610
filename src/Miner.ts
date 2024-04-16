@@ -30,10 +30,11 @@ export class Miner {
       weights
     );
 
-    const wTxid = res.map((tx) => tx.getWTxID()); // witness root hash
+    // const wTxid = res.map((tx) => tx.getWTxID().reverse().toString("hex")); // witness root hash
+    const wTxid = res.map((tx) => tx.getWTxID());
     const witnessCommitment = calculateWitnessCommitment(wTxid);
 
-    // console.log("witnessCommitment", witnessCommitment);
+    console.log("witnessCommitment", witnessCommitment);
 
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
     // console.log(coinbaseTx);
