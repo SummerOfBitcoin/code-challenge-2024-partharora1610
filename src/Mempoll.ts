@@ -4,7 +4,6 @@ import { Tx } from "./Tx";
 import { TxIn } from "./TxIn";
 import { Script } from "./Script";
 import { TxOut } from "./TxOut";
-import { json } from "react-router-dom";
 
 export class Mempoll {
   public txs: Tx[];

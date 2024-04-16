@@ -1,3 +1,4 @@
+import { hash25 } from "./Miner";
 import { Script, ScriptCmd } from "./Script";
 import { TxIn } from "./TxIn";
 import { TxOut } from "./TxOut";
@@ -140,9 +141,9 @@ export class Tx {
 
   public getTxID() {
     if (!this.segwit) {
-      return sha256(sha256(this.serializeLegacy()));
+      return hash25(this.serializeLegacy());
     } else {
-      return sha256(sha256(this.serializeSegwitTxID()));
+      return hash25(this.serializeSegwitTxID());
     }
   }
 

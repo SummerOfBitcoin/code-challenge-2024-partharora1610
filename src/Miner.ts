@@ -36,19 +36,8 @@ export class Miner {
 
     const txid = res.map((tx) => tx.getTxID());
 
-    // Data for mining the block
     const hashBuf = txid.map((tx) => Buffer.from(tx));
     const mr = generateMerkleRoot(hashBuf);
-    const version = Buffer.from("00000004", "hex");
-    const hexString: string =
-      "0000ffff00000000000000000000000000000000000000000000000000000000";
-    const bigintValue: bigint = BigInt("0x" + hexString);
-    // const prevBlock = this.blockchain.getLatestBlock().hash();
-    // for checking
-
-    // The fuction is giving the wrong output so I am hardcoding the bits value
-    // hard coding this....
-    const bits = Buffer.from("1f00ffff", "hex");
 
     /**
      * version
@@ -60,14 +49,14 @@ export class Miner {
      */
     const block = Block.mineBlock(mr);
 
-    // console.log("Final Result of the block mining: ");
-    // console.log(this.filled);
-    // console.log(this.feesCollected);
+    console.log("Final Result of the block mining: ");
+    console.log(this.filled);
+    console.log(this.feesCollected);
 
     writeToOutputFile(
       block,
       coinbaseTx,
-      txid.map((tx) => tx.toString("hex"))
+      txid.map((tx) => tx.split("").reverse().join(""))
     );
   }
 
