@@ -40,8 +40,6 @@ export class Miner {
     const wTxid = res.map((tx) => tx.getWTxID()); // witness root hash
     const witnessCommitment = calculateWitnessCommitment(wTxid);
 
-    // console.log(witnessCommitment);
-
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
 
     const txid = res.map((tx) => tx.getTxID());

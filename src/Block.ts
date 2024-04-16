@@ -2,6 +2,13 @@ import { writeBytesReverse, bufToStream } from "./util/BufferUtil";
 import { hash256 } from "./util/Hash256";
 import { bigFromBufLE } from "./util/BigIntUtil";
 import { Readable } from "stream";
+import { hash25 } from "./Miner";
+import { createHash } from "crypto";
+
+const difficulty = Buffer.from(
+  "0000ffff00000000000000000000000000000000000000000000000000000000",
+  "hex"
+);
 
 export class Block {
   public static parse(stream: Readable): Block {
@@ -92,9 +99,13 @@ export class Block {
     while (true) {
       const timestamp = BigInt(Math.floor(Date.now() / 1000));
       const block = createBlock(merkleRoot.toString("hex"), nonce);
-      const hash = hash256(Buffer.from(block, "hex")).toString("hex");
+      const buffer = Buffer.from(block, "hex");
 
-      if (hash.startsWith("0".repeat(4))) {
+      const h1 = createHash("sha256").update(buffer).digest();
+      const h2 = createHash("sha256").update(h1).digest();
+      const hash = h2.reverse().reverse();
+
+      if (difficulty.compare(hash) < 0) {
         return { block, hash };
       }
 
