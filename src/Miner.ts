@@ -9,6 +9,7 @@ import {
   COINBASE_TX_SIZE,
 } from "./constants";
 import fs from "fs";
+import { createHash } from "crypto";
 
 export class Miner {
   public mempoll: Mempoll;
@@ -36,17 +37,13 @@ export class Miner {
       weights
     );
 
-    const coinbaseTx = Tx.createCoinbaseTransaction(
-      "76a914df1855a61bb61e4476fdca867064ef62ecc4f8cc88ac", // random address from learnmeabitcoin
-      BigInt(this.feesCollected + 625000000),
-      1n
-    );
+    const wTxid = res.map((tx) => tx.getWTxID()); // witness root hash
+    const witnessCommitment = calculateWitnessCommitment(wTxid);
 
-    // console.log("Coinbase Transaction: ");
-    // console.log(coinbaseTx);
-    // console.log("===================================================");
-    // console.log("Coinbase Transaction Added to the list of transaction ");
-    // res.unshift(coinbaseTx);
+    // console.log(witnessCommitment);
+
+    const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
+
     const txid = res.map((tx) => tx.getTxID());
 
     // Data for mining the block
@@ -75,23 +72,16 @@ export class Miner {
      * nonce
      */
     const block = Block.mineBlock(version, prevBlock, mr, bits);
-    // Adding block to the blockchain
-    // this.blockchain.addBlock(block.block);
-
-    // console.log("Block mined successfully!");
-    // console.log(block);
 
     // console.log("Final Result of the block mining: ");
     // console.log(this.filled);
     // console.log(this.feesCollected);
 
     writeToOutputFile(
-      block.block.serialize().reverse().toString("hex"),
-      coinbaseTx.serialize().toString("hex"),
+      block.block,
+      coinbaseTx,
       txid.map((tx) => tx.toString("hex"))
     );
-
-    // running grader
   }
 
   public fillBlock(
@@ -148,41 +138,45 @@ function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
     if (err) {
       // console.error("Error writing to output.txt:", err);
     } else {
-      // console.log("Output file generated successfully!");
     }
   });
 }
+export const generateMerkleRoot = (txids) => {
+  if (txids.length === 0) return null;
 
-export const constructBlockHeader = (
-  version,
-  timestamp,
-  merkleRoot,
-  bits,
-  nonce
-) => {};
+  let level = txids.map((txid) => Buffer.from(txid).reverse().toString("hex"));
 
-/**
- * Result to the first run 
- * {
-  block: Block {
-    version: 67108864n,
-    prevBlock: <Buffer dd 10 89 0b 9d ec 47 3f dc 8d c3 07 36 51 26 16 a8 25 6c 32 28 c7 16 fb c2 aa a4 be e8 52 a1 c3>,
-    merkleRoot: <Buffer b4 58 8c 07 8b 08 32 6d 09 0f 9d 09 ca 1e 44 99 f5 a7 b6 7b 92 cb 36 85 b4 e6 fe ef e6 29 d9 13>,
-    timestamp: 1713182777n,
-    bits: <Buffer 1f 00 ff ff>,
-    nonce: <Buffer a2 a2 a2 a2>
-  },
-  hash: '0000dde452f515d77a48a151caeea490a65c0b1abcd8ea4797d01f4c1c795365'
-}
-Final Result of the block mining: 
-533 => block space left
-31831992 => satoshis collected
-Output file generated successfully!
- */
+  while (level.length > 1) {
+    const nextLevel = [];
 
-// 31831992 + 625000000 (coinbase reward) = 656831992
+    for (let i = 0; i < level.length; i += 2) {
+      let pairHash;
+      if (i + 1 === level.length) {
+        pairHash = hash25(level[i] + level[i]);
+      } else {
+        pairHash = hash25(level[i] + level[i + 1]);
+      }
+      nextLevel.push(pairHash);
+    }
 
-// exmple merkle root =>
-// 0f245e80e40780318b266454212e136e7859320d2dc8d6c588a7823bb6b5ba2c
-// b4588c078b08326d090f9d09ca1e4499f5a7b67b92cb3685b4e6feefe629d913
-// rempv white spce from above line
+    level = nextLevel;
+  }
+
+  return level[0];
+};
+
+export const hash25 = (input) => {
+  const h1 = createHash("sha256").update(Buffer.from(input, "hex")).digest();
+  return createHash("sha256").update(h1).digest("hex");
+};
+
+export const WITNESS_RESERVED_VALUE = Buffer.from(
+  "0000000000000000000000000000000000000000000000000000000000000000",
+  "hex"
+);
+
+const calculateWitnessCommitment = (wtxids) => {
+  const witnessRoot = generateMerkleRoot(wtxids);
+  const witnessReservedValue = WITNESS_RESERVED_VALUE.toString("hex");
+  return hash25(witnessRoot + witnessReservedValue);
+};

@@ -22,31 +22,25 @@ export class Tx {
 
   // need to update this function
   // need to updated this to include wTxid commitnent as a 2 output to the transaction
-  public static createCoinbaseTransaction(
-    rewardAddress: string,
-    rewardAmount: bigint,
-    height: bigint
-  ): Tx {
-    const coinbaseTx = new Tx();
-
-    coinbaseTx.version = 1n;
-
-    const coinbaseInput = new TxIn(
-      "0000000000000000000000000000000000000000000000000000000000000000",
-      0xffffffffn,
-      new Script(), // only need to figure out what will be this
-      0xffffffffn
-    );
-
-    coinbaseTx.txIns.push(coinbaseInput);
-
-    const coinbaseOutput = new TxOut(
-      rewardAmount,
-      new Script([], rewardAddress)
-    );
-    coinbaseTx.txOuts.push(coinbaseOutput);
-
-    coinbaseTx.locktime = height;
+  public static createCoinbaseTransaction(witnessCommitment: any): string {
+    let coinbaseTx = "";
+    coinbaseTx += "01000000";
+    coinbaseTx += "00";
+    coinbaseTx += "01";
+    coinbaseTx += "01";
+    coinbaseTx += (0).toString(16).padStart(64, "0");
+    coinbaseTx += "ffffffff";
+    coinbaseTx +=
+      "2503233708184d696e656420627920416e74506f6f6c373946205b8160a4256c0000946e0100";
+    coinbaseTx += "ffffffff";
+    // coinbaseTx += "02";
+    // coinbaseTx += bigToBufLE(rewardAmount, 8).toString("hex");
+    // coinbaseTx += "19";
+    coinbaseTx +=
+      "02f595814a000000001976a914edf10a7fac6b32e24daa5305c723f3de58db1bc888ac000000000000000026";
+    coinbaseTx += `6a24aa21a9ed${witnessCommitment}`;
+    coinbaseTx +=
+      "0120000000000000000000000000000000000000000000000000000000000000000000000000";
 
     return coinbaseTx;
   }
@@ -63,6 +57,14 @@ export class Tx {
     this.txOuts = txOuts;
     this.locktime = locktime;
     this.segwit = segwit;
+  }
+
+  public getWTxID() {
+    if (!this.segwit) {
+      return sha256(sha256(this.serializeLegacy()));
+    } else {
+      return sha256(sha256(this.serializeSegwit()));
+    }
   }
 
   public toString() {

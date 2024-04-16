@@ -21,7 +21,6 @@ export class Block {
   public timestamp: bigint;
   public bits: Buffer;
   public nonce: Buffer;
-  // public txHashes: string[];
 
   /**
    * Represents a Block
@@ -87,22 +86,13 @@ export class Block {
     merkleRoot: Buffer,
     bits: Buffer
   ) {
-    const timestamp = BigInt(Math.floor(Date.now() / 1000));
     let nonce = 0;
     let hash = "";
 
     while (true) {
-      const block = new Block(
-        bigFromBufLE(version),
-        prevBlockHash,
-        merkleRoot,
-        timestamp,
-        bits,
-        Buffer.alloc(4, nonce)
-      );
-
-      hash = block.hash().toString("hex");
-      // console.log(hash, "hash");
+      const timestamp = BigInt(Math.floor(Date.now() / 1000));
+      const block = createBlock(merkleRoot.toString("hex"), nonce);
+      const hash = hash256(Buffer.from(block, "hex")).toString("hex");
 
       if (hash.startsWith("0".repeat(4))) {
         return { block, hash };
@@ -111,4 +101,21 @@ export class Block {
       nonce++;
     }
   }
+}
+
+function createBlock(merkle_root, nonce) {
+  let serialize = "";
+  serialize += "11000000"; // Version -> 4 bytes -> Little Endian
+  serialize += (0).toString(16).padStart(64, "0"); // Previous Block Hash -> 32 bytes -> Natural byte order
+  serialize += merkle_root; // Merkle Root -> 32 bytes -> Natural Byte Order
+  const Time = Math.floor(Date.now() / 1000);
+  serialize += Time.toString(16)
+    .padStart(8, "0")
+    .match(/../g)
+    .reverse()
+    .join("");
+  serialize += "ffff001f";
+  serialize += nonce.toString(16).padStart(8, "0");
+
+  return serialize;
 }
