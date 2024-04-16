@@ -107,47 +107,11 @@ export class Tx {
     let z: Buffer;
     let witness: ScriptCmd[];
 
-    // P2SH scripts
-    // if (scriptPubKey.isP2SHLock()) {
-    //   const redeemBytes = txIn.scriptSig.cmds[
-    //     txIn.scriptSig.cmds.length - 1
-    //   ] as Buffer;
-
-    //   const redeemScript = new Script([], redeemBytes.toString("hex"));
-
-    //   z = this.sigHashLegacy(idx, redeemScript);
-    //   witness = undefined;
-    // }
-
-    // // P2PWKH scripts
-    // else if (scriptPubKey.isP2WPKHLock()) {
-    //   z = this.sigHashSegwit(idx);
-    //   witness = txIn.witness;
-    // }
-
-    // // P2WSH scripts
-    // else if (scriptPubKey.isP2WSHLock()) {
-    //   const witnessScriptBuf = txIn.witness[txIn.witness.length - 1] as Buffer;
-
-    //   const witnessScript = new Script([], witnessScriptBuf.toString("hex"));
-
-    //   z = this.sigHashSegwit(idx, undefined, witnessScript);
-
-    //   witness = txIn.witness;
-    // }
-
-    // // Legacy Scripts (P2PKH or P2Pk)
-    // else {
-    // try {
-    //   z = this.sigHashLegacy(idx);
-    // } catch (error) {
-    //   throw new Error("Error in sigHashLegacy");
-    // }
-    // // }
-
     if (scriptPubKey.isP2PKHLock()) {
       z = this.sigHashLegacy(idx);
       witness = undefined;
+    } else {
+      return false;
     }
 
     const combined = txIn.scriptSig.add(scriptPubKey);
