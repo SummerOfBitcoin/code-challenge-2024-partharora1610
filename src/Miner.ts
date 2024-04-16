@@ -4,6 +4,7 @@ import { Tx } from "./Tx";
 import { BLOCK_HEADER_SIZE, COINBASE_TX_SIZE } from "./constants";
 import fs from "fs";
 import { createHash } from "crypto";
+import { get } from "http";
 
 export class Miner {
   public mempoll: Mempoll;
@@ -33,10 +34,13 @@ export class Miner {
     const witnessCommitment = calculateWitnessCommitment(wTxid);
 
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
+    const coinbaseId = hash25(coinbaseTx);
 
-    const txid = res.map((tx) => tx.getTxID().split("").reverse().join(""));
+    const txid = res.map((tx) => tx.getTxID());
+    txid.unshift(coinbaseId);
 
     const hashBuf = txid.map((tx) => Buffer.from(tx));
+
     const mr = generateMerkleRoot(hashBuf);
 
     /**
@@ -52,7 +56,8 @@ export class Miner {
     writeToOutputFile(
       block,
       coinbaseTx,
-      txid.map((tx) => tx)
+      // reversing to get the txId
+      txid.map((tx) => tx.split("").reverse().join(""))
     );
   }
 
@@ -106,7 +111,6 @@ function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
 
   fs.writeFile("output.txt", outputData, (err) => {
     if (err) {
-      // console.error("Error writing to output.txt:", err);
     } else {
     }
   });
