@@ -87,7 +87,7 @@ export class Block {
       const block = createBlock(merkleRoot.toString("hex"), nonce);
       const hash = hash256(Buffer.from(block, "hex")).toString("hex");
 
-      console.log(hash);
+      // console.log(hash);
 
       if (hash.startsWith("0".repeat(4))) {
         return { block, hash };
