@@ -1,10 +1,9 @@
+import fs from "fs";
 import { Block } from "./Block";
 import { Mempoll } from "./Mempoll";
 import { Tx } from "./Tx";
 import { BLOCK_HEADER_SIZE, COINBASE_TX_SIZE } from "./constants";
-import fs from "fs";
 import { createHash } from "crypto";
-import { get } from "http";
 import { hash256 } from "./util/Hash256";
 
 export class Miner {
@@ -25,7 +24,7 @@ export class Miner {
     const weights = this.mempoll.txWeightVector;
 
     const res = this.fillBlock(
-      maxBlockSize - BLOCK_HEADER_SIZE - COINBASE_TX_SIZE,
+      maxBlockSize - COINBASE_TX_SIZE,
       tx,
       fees,
       weights
@@ -43,7 +42,7 @@ export class Miner {
     const txid = res.map((tx) => tx.getTxID().reverse().toString("hex"));
 
     // const txid = res.map((tx) => tx.getTxID());
-    // txid.unshift(coinbaseId.toString("hex"));
+    txid.unshift(coinbaseId.toString("hex"));
 
     const hashBuf = txid.map((tx) => Buffer.from(tx, "hex"));
     const mr = generateMerkleRoot(hashBuf);
