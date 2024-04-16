@@ -4,6 +4,7 @@ import { Tx } from "./Tx";
 import { TxIn } from "./TxIn";
 import { Script } from "./Script";
 import { TxOut } from "./TxOut";
+import { json } from "react-router-dom";
 
 export class Mempoll {
   public txs: Tx[];
@@ -65,21 +66,34 @@ export class Mempoll {
         const data = fs.readFileSync(filePath, "utf8");
         const jsonData = JSON.parse(data);
 
-        const newTx = this.createTxFromJson(jsonData);
+        const flag = checkOnlyP2PKH(jsonData);
 
-        this.txs.push(newTx);
+        if (flag) {
+          const newTx = this.createTxFromJson(jsonData);
 
-        try {
-          this.txWeightVector.push(newTx.calculateWeight());
-        } catch {
-          // need to handle this bug ?? one reason could be missing OPCODES implementation
-          this.txWeightVector.push(10000);
+          this.txs.push(newTx);
+
+          try {
+            this.txWeightVector.push(newTx.calculateWeight());
+          } catch {
+            // need to handle this bug ?? one reason could be missing OPCODES implementation
+            this.txWeightVector.push(10000);
+          }
+
+          this.feesArrayVector.push(newTx.fees());
         }
-
-        this.feesArrayVector.push(newTx.fees());
       }
     } catch (err) {
       console.error("Error processing mempool:", err);
     }
   }
 }
+
+const checkOnlyP2PKH = (jsonData: any) => {
+  for (let i = 0; i < jsonData.vin.length; i++) {
+    if (jsonData.vin[i].prevout.scriptpubkey_type != "p2pkh") {
+      return false;
+    }
+  }
+  return true;
+};
