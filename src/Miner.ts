@@ -65,7 +65,7 @@ export class Miner {
     // console.log(this.feesCollected);
 
     writeToOutputFile(
-      block.block,
+      block,
       coinbaseTx,
       txid.map((tx) => tx.toString("hex"))
     );
