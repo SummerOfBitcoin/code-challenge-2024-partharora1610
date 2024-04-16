@@ -92,6 +92,19 @@ export class Tx {
     return false;
   }
 
+  public txIsSegwit() {
+    for (let i = 0; i < this.txIns.length; i++) {
+      const input = this.txIns[i];
+      const type = input.scriptType;
+
+      if (type == "v0_p2wpkh" || type == "v0_p2wsh") {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public fees(): bigint {
     let inAmt = 0n;
     for (const txIn of this.txIns) {
@@ -160,6 +173,10 @@ export class Tx {
       if (txIn.scriptType == "v1_p2tr") {
         return false;
       }
+    }
+
+    if (this.txIsSegwit()) {
+      return false;
     }
 
     if (this.fees() < 0) {
