@@ -3,6 +3,11 @@ import { hash256 } from "./util/Hash256";
 import { bigFromBufLE } from "./util/BigIntUtil";
 import { Readable } from "stream";
 
+const difficulty = Buffer.from(
+  "0000ffff00000000000000000000000000000000000000000000000000000000",
+  "hex"
+);
+
 export class Block {
   public static parse(stream: Readable): Block {
     const version = bigFromBufLE(stream.read(4));
@@ -87,9 +92,7 @@ export class Block {
       const block = createBlock(merkleRoot.toString("hex"), nonce);
       const hash = hash256(Buffer.from(block, "hex")).toString("hex");
 
-      // console.log(hash);
-
-      if (hash.startsWith("0".repeat(4))) {
+      if (difficulty.compare(Buffer.from(hash, "hex")) < 0) {
         return { block, hash };
       }
 
