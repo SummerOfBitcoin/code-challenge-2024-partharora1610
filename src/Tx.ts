@@ -20,8 +20,6 @@ export class Tx {
   private _hashSequence: Buffer;
   private _hashOutputs: Buffer;
 
-  // need to update this function
-  // need to updated this to include wTxid commitnent as a 2 output to the transaction
   public static createCoinbaseTransaction(witnessCommitment: any): string {
     let coinbaseTx = "";
     coinbaseTx += "01000000";
@@ -33,9 +31,6 @@ export class Tx {
     coinbaseTx +=
       "2503233708184d696e656420627920416e74506f6f6c373946205b8160a4256c0000946e0100";
     coinbaseTx += "ffffffff";
-    // coinbaseTx += "02";
-    // coinbaseTx += bigToBufLE(rewardAmount, 8).toString("hex");
-    // coinbaseTx += "19";
     coinbaseTx +=
       "02f595814a000000001976a914edf10a7fac6b32e24daa5305c723f3de58db1bc888ac000000000000000026";
     coinbaseTx += `6a24aa21a9ed${witnessCommitment}`;
@@ -92,19 +87,6 @@ export class Tx {
     return false;
   }
 
-  public txIsSegwit() {
-    for (let i = 0; i < this.txIns.length; i++) {
-      const input = this.txIns[i];
-      const type = input.scriptType;
-
-      if (type == "v0_p2wpkh" || type == "v0_p2wsh") {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   public fees(): bigint {
     let inAmt = 0n;
     for (const txIn of this.txIns) {
@@ -126,41 +108,45 @@ export class Tx {
     let witness: ScriptCmd[];
 
     // P2SH scripts
-    if (scriptPubKey.isP2SHLock()) {
-      const redeemBytes = txIn.scriptSig.cmds[
-        txIn.scriptSig.cmds.length - 1
-      ] as Buffer;
+    // if (scriptPubKey.isP2SHLock()) {
+    //   const redeemBytes = txIn.scriptSig.cmds[
+    //     txIn.scriptSig.cmds.length - 1
+    //   ] as Buffer;
 
-      const redeemScript = new Script([], redeemBytes.toString("hex"));
+    //   const redeemScript = new Script([], redeemBytes.toString("hex"));
 
-      z = this.sigHashLegacy(idx, redeemScript);
-      witness = undefined;
-    }
+    //   z = this.sigHashLegacy(idx, redeemScript);
+    //   witness = undefined;
+    // }
 
-    // P2PWKH scripts
-    else if (scriptPubKey.isP2WPKHLock()) {
-      z = this.sigHashSegwit(idx);
-      witness = txIn.witness;
-    }
+    // // P2PWKH scripts
+    // else if (scriptPubKey.isP2WPKHLock()) {
+    //   z = this.sigHashSegwit(idx);
+    //   witness = txIn.witness;
+    // }
 
-    // P2WSH scripts
-    else if (scriptPubKey.isP2WSHLock()) {
-      const witnessScriptBuf = txIn.witness[txIn.witness.length - 1] as Buffer;
+    // // P2WSH scripts
+    // else if (scriptPubKey.isP2WSHLock()) {
+    //   const witnessScriptBuf = txIn.witness[txIn.witness.length - 1] as Buffer;
 
-      const witnessScript = new Script([], witnessScriptBuf.toString("hex"));
+    //   const witnessScript = new Script([], witnessScriptBuf.toString("hex"));
 
-      z = this.sigHashSegwit(idx, undefined, witnessScript);
+    //   z = this.sigHashSegwit(idx, undefined, witnessScript);
 
-      witness = txIn.witness;
-    }
+    //   witness = txIn.witness;
+    // }
 
-    // Legacy Scripts (P2PKH or P2Pk)
-    else {
-      try {
-        z = this.sigHashLegacy(idx);
-      } catch (error) {
-        throw new Error("Error in sigHashLegacy");
-      }
+    // // Legacy Scripts (P2PKH or P2Pk)
+    // else {
+    // try {
+    //   z = this.sigHashLegacy(idx);
+    // } catch (error) {
+    //   throw new Error("Error in sigHashLegacy");
+    // }
+    // // }
+
+    if (scriptPubKey.isP2PKHLock()) {
+      z = this.sigHashLegacy(idx);
       witness = undefined;
     }
 
@@ -173,10 +159,6 @@ export class Tx {
       if (txIn.scriptType == "v1_p2tr") {
         return false;
       }
-    }
-
-    if (this.txIsSegwit()) {
-      return false;
     }
 
     if (this.fees() < 0) {
