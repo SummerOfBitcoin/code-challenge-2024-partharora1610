@@ -2,6 +2,7 @@ import { writeBytesReverse, bufToStream } from "./util/BufferUtil";
 import { hash256 } from "./util/Hash256";
 import { bigFromBufLE } from "./util/BigIntUtil";
 import { Readable } from "stream";
+import { hash25 } from "./Miner";
 
 const difficulty = Buffer.from(
   "0000ffff00000000000000000000000000000000000000000000000000000000",
@@ -90,7 +91,7 @@ export class Block {
 
     while (true) {
       const block = createBlock(merkleRoot.toString("hex"), nonce);
-      const hash = hash256(Buffer.from(block, "hex")).toString("hex");
+      const hash = hash25(Buffer.from(block, "hex"));
 
       if (difficulty.compare(Buffer.from(hash, "hex")) < 0) {
         return { block, hash };
