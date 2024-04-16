@@ -1,13 +1,7 @@
 import { Block } from "./Block";
-import { Blockchain } from "./Blockchain";
 import { Mempoll } from "./Mempoll";
 import { Tx } from "./Tx";
-import { merkleRoot } from "./util/MerkleUtil";
-import {
-  BLOCK_HEADER_SIZE,
-  COINBASE_REWARD,
-  COINBASE_TX_SIZE,
-} from "./constants";
+import { BLOCK_HEADER_SIZE, COINBASE_TX_SIZE } from "./constants";
 import fs from "fs";
 import { createHash } from "crypto";
 
@@ -16,12 +10,10 @@ export class Miner {
   public dp;
   public filled = 4000000;
   public feesCollected = 0;
-  // private blockchain: Blockchain
 
   constructor() {
     this.mempoll = new Mempoll();
     this.dp = new Map();
-    // this.blockchain = blockchain;
   }
 
   public async mineBlock() {
@@ -46,17 +38,14 @@ export class Miner {
 
     // Data for mining the block
     const hashBuf = txid.map((tx) => Buffer.from(tx));
-    const mr = merkleRoot(hashBuf);
+    const mr = generateMerkleRoot(hashBuf);
     const version = Buffer.from("00000004", "hex");
     const hexString: string =
       "0000ffff00000000000000000000000000000000000000000000000000000000";
     const bigintValue: bigint = BigInt("0x" + hexString);
     // const prevBlock = this.blockchain.getLatestBlock().hash();
     // for checking
-    const prevBlock = Buffer.from(
-      "dd10890b9dec473fdc8dc30736512616a8256c3228c716fbc2aaa4bee852a1c3",
-      "hex"
-    );
+
     // The fuction is giving the wrong output so I am hardcoding the bits value
     // hard coding this....
     const bits = Buffer.from("1f00ffff", "hex");
@@ -69,7 +58,7 @@ export class Miner {
      * bits
      * nonce
      */
-    const block = Block.mineBlock(version, prevBlock, mr, bits);
+    const block = Block.mineBlock(mr);
 
     // console.log("Final Result of the block mining: ");
     // console.log(this.filled);
