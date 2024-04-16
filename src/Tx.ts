@@ -107,11 +107,6 @@ export class Tx {
   public verifyInput(idx: number): boolean {
     const txIn = this.txIns[idx];
 
-    // For p2tr scripts => Out of the scope of assignments so just validating inputs using p2tr scripts
-    // if (txIn.scriptType == "v1_p2tr") {
-    //   return true;
-    // }
-
     const scriptPubKey = txIn.scriptPubKey();
 
     let z: Buffer;
@@ -163,7 +158,7 @@ export class Tx {
   public verify(): boolean {
     for (const txIn of this.txIns) {
       if (txIn.scriptType == "v1_p2tr") {
-        return true;
+        return false;
       }
     }
 
