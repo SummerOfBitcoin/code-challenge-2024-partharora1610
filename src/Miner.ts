@@ -45,7 +45,7 @@ export class Miner {
     // const txid = res.map((tx) => tx.getTxID());
     // txid.unshift(coinbaseId.toString("hex"));
 
-    const hashBuf = txid.map((tx) => Buffer.from(tx));
+    const hashBuf = txid.map((tx) => Buffer.from(tx, "hex"));
     const mr = generateMerkleRoot(hashBuf);
 
     /**
