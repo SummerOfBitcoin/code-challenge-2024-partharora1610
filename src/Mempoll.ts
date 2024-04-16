@@ -5,6 +5,8 @@ import { TxIn } from "./TxIn";
 import { Script } from "./Script";
 import { TxOut } from "./TxOut";
 
+let count = 0;
+
 export class Mempoll {
   public txs: Tx[];
   private folderPath = "./mempool";
@@ -61,11 +63,14 @@ export class Mempoll {
       );
 
       for (const jsonFile of jsonFiles) {
+        if (count == 10) break;
+
         const filePath = path.join(this.folderPath, jsonFile);
         const data = fs.readFileSync(filePath, "utf8");
         const jsonData = JSON.parse(data);
 
         const flag = checkOnlyP2PKH(jsonData);
+        if (flag) count++;
 
         if (flag) {
           const newTx = this.createTxFromJson(jsonData);
