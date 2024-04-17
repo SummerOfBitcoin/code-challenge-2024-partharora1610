@@ -32,14 +32,18 @@ export class Miner {
 
     // const wTxid = res.map((tx) => tx.getWTxID().reverse().toString("hex")); // witness root hash
     const wTxid = res.map((tx) => tx.getWTxID().reverse().toString("hex"));
+
     const wTxidCoinbase = Buffer.from(
       "0000000000000000000000000000000000000000000000000000000000000000",
       "hex"
     );
-    // wTxid.unshift(wTxidCoinbase);
+
+    // adding the coinbase of the block to the wTxid
+    wTxid.unshift(wTxidCoinbase.toString("hex"));
+
     const witnessCommitment = calculateWitnessCommitment(wTxid);
 
-    console.log("witnessCommitment", witnessCommitment);
+    // console.log("witnessCommitment", witnessCommitment);
     // 51fb247719ba85008351c1a55f5280973498f4d6c7e7c272972991b6a980732b
 
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
@@ -124,6 +128,7 @@ function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
 
   fs.writeFile("output.txt", outputData, (err) => {
     if (err) {
+      console.error(err);
     } else {
     }
   });

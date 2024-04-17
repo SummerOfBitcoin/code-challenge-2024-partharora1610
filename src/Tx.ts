@@ -59,7 +59,7 @@ export class Tx {
     if (!this.segwit) {
       return this.getTxID();
     } else {
-      return hash256(this.serializeSegwit());
+      return sha256(sha256(this.serializeSegwit()));
     }
   }
 
