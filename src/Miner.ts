@@ -50,7 +50,7 @@ export class Miner {
 
     const coinbaseId = hash256(Buffer.from(coinbaseTx));
 
-    const txid = res.map((tx) => tx.getTxID().reverse().toString("hex"));
+    const txid = res.map((tx) => tx.getTxID().toString("hex"));
 
     txid.unshift(coinbaseId.toString("hex"));
 
