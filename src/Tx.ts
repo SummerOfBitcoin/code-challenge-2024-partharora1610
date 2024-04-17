@@ -57,7 +57,7 @@ export class Tx {
 
   public getWTxID() {
     if (!this.segwit) {
-      return this.getTxID();
+      return sha256(sha256(this.serializeLegacy()));
     } else {
       return sha256(sha256(this.serializeSegwit()));
     }

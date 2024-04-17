@@ -38,28 +38,24 @@ export class Miner {
       "hex"
     );
 
-    // adding the coinbase of the block to the wTxid
+    // adding wtxid of the coinbase transaction
     wTxid.unshift(wTxidCoinbase.toString("hex"));
 
     const witnessCommitment = calculateWitnessCommitment(wTxid);
-
-    // console.log("witnessCommitment", witnessCommitment);
-    // 51fb247719ba85008351c1a55f5280973498f4d6c7e7c272972991b6a980732b
+    // console.log(witnessCommitment, "witnessCommitment");
 
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
-    // console.log(coinbaseTx);
+
+    // console.log(coinbaseTx, "coinbaseTx");
 
     const coinbaseId = hash256(Buffer.from(coinbaseTx));
-    // console.log("coinbaseId", coinbaseId.toString("hex"));
 
     const txid = res.map((tx) => tx.getTxID().reverse().toString("hex"));
 
-    // const txid = res.map((tx) => tx.getTxID());
     txid.unshift(coinbaseId.toString("hex"));
 
     const hashBuf = txid.map((tx) => Buffer.from(tx, "hex"));
     const mr = generateMerkleRoot(hashBuf);
-    // console.log("Merkle Root", mr);
 
     /**
      * version
@@ -136,7 +132,7 @@ function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
 export const generateMerkleRoot = (txids) => {
   if (txids.length === 0) return null;
 
-  let level = txids.map((txid) => Buffer.from(txid).reverse().toString("hex"));
+  let level = txids.map((txid) => Buffer.from(txid).toString("hex"));
 
   while (level.length > 1) {
     const nextLevel = [];
