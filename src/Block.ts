@@ -1,8 +1,7 @@
-import { writeBytesReverse, bufToStream } from "./util/BufferUtil";
+import { writeBytesReverse } from "./util/BufferUtil";
 import { hash256 } from "./util/Hash256";
 import { bigFromBufLE } from "./util/BigIntUtil";
 import { Readable } from "stream";
-import { hash25 } from "./Miner";
 
 const difficulty = Buffer.from(
   "0000ffff00000000000000000000000000000000000000000000000000000000",
@@ -13,11 +12,11 @@ export class Block {
   public static parse(stream: Readable): Block {
     const version = bigFromBufLE(stream.read(4));
 
-    const prevBlock = stream.read(32).reverse(); // convert to RPC byte order
-    const merkleRoot = stream.read(32).reverse(); // convert to RPC byte order
+    const prevBlock = stream.read(32).reverse();
+    const merkleRoot = stream.read(32).reverse();
     const timestamp = bigFromBufLE(stream.read(4));
-    const bits = stream.read(4).reverse(); // convert LE to BE
-    const nonce = stream.read(4).reverse(); // convert LE to BE
+    const bits = stream.read(4).reverse();
+    const nonce = stream.read(4).reverse();
     return new Block(version, prevBlock, merkleRoot, timestamp, bits, nonce);
   }
 
@@ -57,35 +56,6 @@ export class Block {
     return `Block:this.version=${this.version},this.prevBlock=${this.prevBlock},this.merkleRoot=${this.merkleRoot},this.timestamp=${this.timestamp},this.bits=${this.bits},this.nonce=${this.nonce}`;
   }
 
-  public serialize(): Buffer {
-    const result = Buffer.alloc(4 + 32 + 32 + 4 + 4 + 4);
-    let offset = 0;
-
-    result.writeUInt32LE(Number(this.version), offset);
-    offset += 4;
-
-    writeBytesReverse(this.prevBlock, result, offset);
-    offset += 32;
-
-    writeBytesReverse(this.merkleRoot, result, offset);
-    offset += 32;
-
-    result.writeUInt32LE(Number(this.timestamp), offset);
-    offset += 4;
-
-    writeBytesReverse(this.bits, result, offset);
-    offset += 4;
-
-    writeBytesReverse(this.nonce, result, offset);
-    offset += 4;
-
-    return result;
-  }
-
-  public hash(): Buffer {
-    return hash256(this.serialize());
-  }
-
   public static mineBlock(merkleRoot: Buffer) {
     let nonce = 0;
 
@@ -104,9 +74,9 @@ export class Block {
 
 function createBlock(merkle_root, nonce) {
   let serialize = "";
-  serialize += "11000000"; // Version -> 4 bytes -> Little Endian
-  serialize += (0).toString(16).padStart(64, "0"); // Previous Block Hash -> 32 bytes -> Natural byte order
-  serialize += merkle_root; // Merkle Root -> 32 bytes -> Natural Byte Order
+  serialize += "11000000";
+  serialize += (0).toString(16).padStart(64, "0");
+  serialize += merkle_root;
   const Time = Math.floor(Date.now() / 1000);
   serialize += Time.toString(16)
     .padStart(8, "0")
@@ -118,3 +88,6 @@ function createBlock(merkle_root, nonce) {
 
   return serialize;
 }
+
+// 136156
+// 19877820

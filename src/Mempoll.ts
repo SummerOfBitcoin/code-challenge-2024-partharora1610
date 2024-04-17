@@ -5,8 +5,6 @@ import { TxIn } from "./TxIn";
 import { Script } from "./Script";
 import { TxOut } from "./TxOut";
 
-// let count = 0;
-
 export class Mempoll {
   public txs: Tx[];
   private folderPath = "./mempool";

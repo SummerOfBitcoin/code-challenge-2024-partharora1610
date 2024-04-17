@@ -1,6 +1,5 @@
 import { combine } from "./util/BufferUtil";
 import { bigToBufLE } from "./util/BigIntUtil";
-
 import { Script, ScriptCmd } from "./Script";
 
 export class TxIn {

@@ -1,3 +1,4 @@
+import { p2pkhLock } from "./factory/script";
 import { Operations } from "./operations/Operations";
 import { OpCode } from "./operations/opcode";
 import { bigToBufLE } from "./util/BigIntUtil";
@@ -326,23 +327,6 @@ export class Script {
 
           stack.pop();
 
-          // // need to change this
-          // const witness = [
-          //   Buffer.from(""),
-          //   Buffer.from(
-          //     "30440220632b9288099fb49f97231fa6fd1a5827feafbdec078371286a055fc2ac2db70b0220112661faf2b4a3a6155a85f58356550b050adaee0dc541e9c9dfab253f3b3b7101",
-          //     "hex"
-          //   ),
-          //   Buffer.from(
-          //     "304402203af48390599f6b78edd35c2761ad18019f09ae1df29e608b537be25021e5f547022013065326f5a87815f8e8de1cdef210ff41e7d4a76c399b9ea681f76dcab6377201",
-          //     "hex"
-          //   ),
-          //   Buffer.from(
-          //     "5221020d2922f329933405a8ba18ee7cdc7b0819f02a113b9e55fb19a44b4cf1549dd42103d26b127f1dd700779f1d579233d99317e6e16075c9e5b6e3c9e069173ddcc3382102b144f7316d67b66aeb3b76095996e974899886c715d431ebb78c22e09a0e7ee353ae",
-          //     "hex"
-          //   ),
-          // ];
-
           const redeemScriptBuf = witness.pop() as Buffer;
 
           if (!redeemScriptBuf || !s256.equals(sha256(redeemScriptBuf))) {
@@ -368,16 +352,4 @@ export class Script {
 
     return true;
   }
-}
-
-// Move this to a separate file maybe factories ??
-// This is creating a P2PKH Locking Script from the given hash160
-function p2pkhLock(h160: Buffer): Script {
-  return new Script([
-    OpCode.OP_DUP,
-    OpCode.OP_HASH160,
-    h160,
-    OpCode.OP_EQUALVERIFY,
-    OpCode.OP_CHECKSIG,
-  ]);
 }

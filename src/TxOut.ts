@@ -1,6 +1,5 @@
-import { Readable } from "stream";
 import { combine } from "./util/BufferUtil";
-import { bigFromBufLE, bigToBufLE } from "./util/BigIntUtil";
+import { bigToBufLE } from "./util/BigIntUtil";
 import { Script } from "./Script";
 
 export class TxOut {
