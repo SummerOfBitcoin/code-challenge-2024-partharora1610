@@ -112,6 +112,9 @@ export class Tx {
     if (scriptPubKey.isP2PKHLock()) {
       z = this.sigHashLegacy(idx);
       witness = undefined;
+    } else if (scriptPubKey.isP2WPKHLock()) {
+      z = this.sigHashSegwit(idx);
+      witness = txIn.witness;
     } else {
       return false;
     }

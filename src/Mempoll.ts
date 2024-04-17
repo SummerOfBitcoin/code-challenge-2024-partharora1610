@@ -63,14 +63,11 @@ export class Mempoll {
       );
 
       for (const jsonFile of jsonFiles) {
-        // if (count == 10) break;
-
         const filePath = path.join(this.folderPath, jsonFile);
         const data = fs.readFileSync(filePath, "utf8");
         const jsonData = JSON.parse(data);
 
-        const flag = checkOnlyP2PKH(jsonData);
-        // if (flag) count++;
+        const flag = checkOnlyP2PKH(jsonData) || checkOnlyP2WPKH(jsonData);
 
         if (flag) {
           const newTx = this.createTxFromJson(jsonData);
@@ -81,6 +78,7 @@ export class Mempoll {
             this.txWeightVector.push(newTx.calculateWeight());
           } catch {
             // need to handle this bug ?? one reason could be missing OPCODES implementation
+            // this is for P2TR tx, will ignore these
             this.txWeightVector.push(10000);
           }
 
@@ -96,6 +94,15 @@ export class Mempoll {
 const checkOnlyP2PKH = (jsonData: any) => {
   for (let i = 0; i < jsonData.vin.length; i++) {
     if (jsonData.vin[i].prevout.scriptpubkey_type != "p2pkh") {
+      return false;
+    }
+  }
+  return true;
+};
+
+const checkOnlyP2WPKH = (jsonData: any) => {
+  for (let i = 0; i < jsonData.vin.length; i++) {
+    if (jsonData.vin[i].prevout.scriptpubkey_type != "v0_p2wpkh") {
       return false;
     }
   }
