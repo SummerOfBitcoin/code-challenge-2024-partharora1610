@@ -23,12 +23,7 @@ export class Miner {
     const fees = this.mempoll.feesArrayVector;
     const weights = this.mempoll.txWeightVector;
 
-    const res = this.fillBlock(
-      maxBlockSize - COINBASE_TX_SIZE,
-      tx,
-      fees,
-      weights
-    );
+    const res = this.fillBlock(maxBlockSize - 2000, tx, fees, weights);
 
     const wTxid = res.map((tx) => tx.getWTxID().reverse().toString("hex"));
 
@@ -69,6 +64,9 @@ export class Miner {
       coinbaseTx,
       txid.map((tx) => tx)
     );
+
+    console.log(this.filled);
+    console.log(this.feesCollected);
   }
 
   public fillBlock(
