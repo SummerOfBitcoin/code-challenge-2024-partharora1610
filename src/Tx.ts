@@ -27,7 +27,8 @@ export class Tx {
     coinbaseTx += "00";
     coinbaseTx += "01";
     coinbaseTx += "01";
-    coinbaseTx += (0).toString(16).padStart(64, "0");
+    coinbaseTx +=
+      "0000000000000000000000000000000000000000000000000000000000000000";
     coinbaseTx += "ffffffff";
     coinbaseTx +=
       "2503233708184d696e656420627920416e74506f6f6c373946205b8160a4256c0000946e0100";

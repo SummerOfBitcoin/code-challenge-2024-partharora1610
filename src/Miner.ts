@@ -30,31 +30,28 @@ export class Miner {
       weights
     );
 
-    // const wTxid = res.map((tx) => tx.getWTxID().reverse().toString("hex")); // witness root hash
-    const wTxid = res.map((tx) => tx.getWTxID().reverse().toString("hex"));
+    const wTxid = res.map((tx) => tx.getWTxID().toString("hex"));
 
     const wTxidCoinbase = Buffer.from(
       "0000000000000000000000000000000000000000000000000000000000000000",
       "hex"
     );
 
-    // adding wtxid of the coinbase transaction
-    wTxid.unshift(wTxidCoinbase.toString("hex"));
+    wTxid.unshift(
+      "0000000000000000000000000000000000000000000000000000000000000000"
+    );
 
     const witnessCommitment = calculateWitnessCommitment(wTxid);
-    // console.log(witnessCommitment, "witnessCommitment");
 
     const coinbaseTx = Tx.createCoinbaseTransaction(witnessCommitment);
 
-    // console.log(coinbaseTx, "coinbaseTx");
-
     const coinbaseId = hash256(Buffer.from(coinbaseTx));
 
-    const txid = res.map((tx) => tx.getTxID().toString("hex"));
-
+    const txid = res.map((tx) => tx.getTxID().reverse().toString("hex"));
     txid.unshift(coinbaseId.toString("hex"));
 
     const hashBuf = txid.map((tx) => Buffer.from(tx, "hex"));
+
     const mr = generateMerkleRoot(hashBuf);
 
     /**
@@ -132,6 +129,30 @@ function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
 export const generateMerkleRoot = (txids) => {
   if (txids.length === 0) return null;
 
+  let level = txids.map((txid) => Buffer.from(txid).reverse().toString("hex"));
+
+  while (level.length > 1) {
+    const nextLevel = [];
+
+    for (let i = 0; i < level.length; i += 2) {
+      let pairHash;
+      if (i + 1 === level.length) {
+        pairHash = hash25(level[i] + level[i]);
+      } else {
+        pairHash = hash25(level[i] + level[i + 1]);
+      }
+      nextLevel.push(pairHash);
+    }
+
+    level = nextLevel;
+  }
+
+  return level[0];
+};
+
+export const generateWitnessRoot = (txids) => {
+  if (txids.length === 0) return null;
+
   let level = txids.map((txid) => Buffer.from(txid).toString("hex"));
 
   while (level.length > 1) {
@@ -164,7 +185,7 @@ export const WITNESS_RESERVED_VALUE = Buffer.from(
 );
 
 const calculateWitnessCommitment = (wtxids) => {
-  const witnessRoot = generateMerkleRoot(wtxids);
+  const witnessRoot = generateWitnessRoot(wtxids);
   const witnessReservedValue = WITNESS_RESERVED_VALUE.toString("hex");
   return hash25(witnessRoot + witnessReservedValue);
 };
