@@ -72,13 +72,7 @@ export class Mempoll {
 
           this.txs.push(newTx);
 
-          try {
-            this.txWeightVector.push(newTx.calculateWeight());
-          } catch {
-            // need to handle this bug ?? one reason could be missing OPCODES implementation
-            // this is for P2TR tx, will ignore these
-            this.txWeightVector.push(10000);
-          }
+          this.txWeightVector.push(newTx.calculateWeight());
 
           this.feesArrayVector.push(newTx.fees());
         }
