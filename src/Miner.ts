@@ -5,6 +5,10 @@ import { Tx } from "./Tx";
 import { BLOCK_HEADER_SIZE, COINBASE_TX_SIZE } from "./constants";
 import { createHash } from "crypto";
 import { hash256 } from "./util/Hash256";
+import {
+  calculateWitnessCommitment,
+  generateMerkleRoot,
+} from "./util/MerkleUtils";
 
 export class Miner {
   public mempoll: Mempoll;
@@ -26,11 +30,6 @@ export class Miner {
     const res = this.fillBlock(maxBlockSize - 2000, tx, fees, weights);
 
     const wTxid = res.map((tx) => tx.getWTxID().reverse().toString("hex"));
-
-    const wTxidCoinbase = Buffer.from(
-      "0000000000000000000000000000000000000000000000000000000000000000",
-      "hex"
-    );
 
     wTxid.unshift(
       "0000000000000000000000000000000000000000000000000000000000000000"
@@ -124,47 +123,3 @@ function writeToOutputFile(blockHeader, coinbaseTxSerialized, transactionIds) {
     }
   });
 }
-
-export const generateMerkleRoot = (txids) => {
-  if (txids.length === 0) return null;
-
-  let level = txids.map((txid) =>
-    Buffer.from(txid, "hex").reverse().toString("hex")
-  );
-
-  while (level.length > 1) {
-    const nextLevel = [];
-
-    for (let i = 0; i < level.length; i += 2) {
-      let pairHash;
-      if (i + 1 === level.length) {
-        pairHash = hash25(level[i] + level[i]);
-      } else {
-        pairHash = hash25(level[i] + level[i + 1]);
-      }
-      nextLevel.push(pairHash);
-    }
-
-    level = nextLevel;
-  }
-
-  return level[0];
-};
-
-export const hash25 = (input) => {
-  const h1 = createHash("sha256").update(Buffer.from(input, "hex")).digest();
-  return createHash("sha256").update(h1).digest("hex");
-};
-
-export const WITNESS_RESERVED_VALUE = Buffer.from(
-  "0000000000000000000000000000000000000000000000000000000000000000",
-  "hex"
-);
-
-const calculateWitnessCommitment = (wtxids) => {
-  const witnessRoot = generateMerkleRoot(wtxids);
-
-  const witnessReservedValue = WITNESS_RESERVED_VALUE.toString("hex");
-  const wc = hash25(witnessRoot + witnessReservedValue);
-  return wc;
-};

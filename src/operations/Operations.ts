@@ -74,35 +74,6 @@ export function opHash256(stack: Buffer[]): boolean {
   return true;
 }
 
-// export function opCheckSig(stack: Buffer[], z: Buffer): boolean {
-//   if (stack.length < 2) {
-//     return false;
-//   }
-
-//   stack.pop();
-
-//   const pkBuf = stack.pop();
-//   const sigBuf = stack.pop();
-
-//   let pk: S256Point;
-//   let sig: Signature;
-
-//   try {
-//     pk = S256Point.parse(pkBuf);
-//     sig = Signature.parse(sigBuf.slice(0, sigBuf.length - 1));
-//   } catch (ex) {
-//     return op0(stack);
-//   }
-
-//   if (pk.verify(bigFromBuf(z), sig)) {
-//     op1(stack);
-//   } else {
-//     op0(stack);
-//   }
-
-//   return true;
-// }
-
 export function op0(stack: Buffer[]): boolean {
   stack.push(encodeNum(0n));
   return true;

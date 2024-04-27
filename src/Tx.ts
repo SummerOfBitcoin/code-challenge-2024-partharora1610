@@ -1,9 +1,7 @@
-import { hash25 } from "./Miner";
 import { Script, ScriptCmd } from "./Script";
 import { TxIn } from "./TxIn";
 import { TxOut } from "./TxOut";
 import { p2pkhLock } from "./factory/script";
-import { OpCode } from "./operations/opcode";
 import { bigToBufLE } from "./util/BigIntUtil";
 import { combine } from "./util/BufferUtil";
 import { hash256 } from "./util/Hash256";
@@ -21,6 +19,7 @@ export class Tx {
   private _hashSequence: Buffer;
   private _hashOutputs: Buffer;
 
+  // need to use constructor to create coinbase tx
   public static createCoinbaseTransaction(witnessCommitment: any): string {
     let coinbaseTx = "";
     coinbaseTx += "01000000";
@@ -115,6 +114,14 @@ export class Tx {
     } else if (scriptPubKey.isP2WPKHLock()) {
       z = this.sigHashSegwit(idx);
       witness = txIn.witness;
+    } else if (scriptPubKey.isP2WSHLock()) {
+      const witnessScriptBuf = txIn.witness[txIn.witness.length - 1] as Buffer;
+
+      const witnessScript = new Script([], witnessScriptBuf.toString("hex"));
+
+      z = this.sigHashSegwit(idx, undefined, witnessScript);
+
+      witness = txIn.witness;
     } else {
       return false;
     }
@@ -162,15 +169,10 @@ export class Tx {
   public serializeLegacy(): Buffer {
     return combine(
       bigToBufLE(this.version, 4),
-
       encodeVarint(BigInt(this.txIns.length)),
-
       ...this.txIns.map((p) => p.serialize()),
-
       encodeVarint(BigInt(this.txOuts.length)),
-
       ...this.txOuts.map((p) => p.serialize()),
-
       bigToBufLE(this.locktime, 4)
     );
   }
