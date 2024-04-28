@@ -19,7 +19,6 @@ export class Tx {
   private _hashSequence: Buffer;
   private _hashOutputs: Buffer;
 
-  // need to use constructor to create coinbase tx
   public static createCoinbaseTransaction(witnessCommitment: any): string {
     let coinbaseTx = "";
     coinbaseTx += "01000000";

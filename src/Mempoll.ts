@@ -100,12 +100,3 @@ const checkOnlyP2WPKH = (jsonData: any) => {
   }
   return true;
 };
-
-const checkOnlyP2WSH = (jsonData: any) => {
-  for (let i = 0; i < jsonData.vin.length; i++) {
-    if (jsonData.vin[i].prevout.scriptpubkey_type != "v0_p2wsh") {
-      return false;
-    }
-  }
-  return true;
-};

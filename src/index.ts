@@ -1,4 +1,4 @@
-import { Miner } from "./Miner";
+// import { Miner } from "./Miner";
 
-const miner = new Miner();
-miner.mineBlock();
+// const miner = new Miner();
+// miner.mineBlock();
